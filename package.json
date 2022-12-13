@@ -1,0 +1,29 @@
+{
+  "name": "repro",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "user": "node user.js",
+    "extended": "node extendedUser.js",
+    "stitch": "wait-on tcp:4001 tcp:4002 && node stitch.js",
+    "start": "concurrently \"npm run user\" \"npm run extended\" \"npm run stitch\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@apollo/federation": "^0.38.1",
+    "@graphql-tools/stitch": "^8.7.32",
+    "@graphql-tools/stitching-directives": "^2.3.23",
+    "@whatwg-node/fetch": "^0.5.3",
+    "apollo-server": "^3.11.1",
+    "graphql": "^16.6.0",
+    "graphql-tag": "^2.12.6",
+    "graphql-yoga": "^3.1.1"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "wait-on": "^6.0.1"
+  }
+}
