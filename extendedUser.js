@@ -19,6 +19,14 @@ const extendedUserResolvers = {
     Query: {
         _dummy: () => 'OK',
     },
+    User: {
+        isNamedTom: (source, args) => {
+            if (source.name === 'Tom') {
+                return true;
+            }
+            return false;
+        },
+    }
 }
 
 const federatedExtendedUserSchema = buildSubgraphSchema({
