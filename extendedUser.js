@@ -2,12 +2,16 @@ const  { buildSubgraphSchema } = require('@apollo/federation');
 const { ApolloServer, gql } = require('apollo-server');
 
 const typeDefs = gql`
+    
+    type ComplexType {
+        someProperty: Boolean
+    }
+    
     extend type User @key(fields: "id") {
         id: ID! @external
         name: Boolean! @external
-        isNamedTom: Boolean! @requires(fields: "name")
+        isSomeComplexType: ComplexType @requires(fields: "name")
     }
-
 
     type Query {
         _dummy: String!
@@ -20,11 +24,11 @@ const extendedUserResolvers = {
         _dummy: () => 'OK',
     },
     User: {
-        isNamedTom: (source, args) => {
+        isSomeComplexType: (source, args) => {
             if (source.name === 'Tom') {
-                return true;
+                return {someProperty: true};
             }
-            return false;
+            return {someProperty: false};
         },
     }
 }
