@@ -21,7 +21,7 @@ const executor = (url) => async ({ document, variables }) => {
 const getSchema = async (url) => {
     const httpExecutor = executor(url);
     const federationSDL = await httpExecutor({ document: '{ _service { sdl } }' });
-    const stitchingSDL = federationToStitchingSDL(federationSDL.data._service.sdl, stitchingConfig)
+    const stitchingSDL = federationSDL.data._service.sdl;
     return {
         schema: buildSchema(stitchingSDL),
         executor: httpExecutor,

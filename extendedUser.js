@@ -1,27 +1,48 @@
-const  { buildSubgraphSchema } = require('@apollo/federation');
-const { ApolloServer, gql } = require('apollo-server');
+const { createSchema, createYoga} = require('graphql-yoga')
+const { createServer } = require('node:http');
 
-const typeDefs = gql`
+const typeDefs = `
+    directive @key(selectionSet: String!) on OBJECT
+    directive @computed(selectionSet: String!) on FIELD_DEFINITION
+    directive @merge(argsExpr: String, keyArg: String, keyField: String, key: [String!], additionalArgs: String) on FIELD_DEFINITION
+    directive @canonical on OBJECT | INTERFACE | INPUT_OBJECT | UNION | ENUM | SCALAR | FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+    
+    type Service {
+        sdl: String!
+    }
     
     type ComplexType {
         someProperty: Boolean
     }
     
-    extend type User @key(fields: "id") {
-        id: ID! @external
-        name: Boolean! @external
-        isSomeComplexType: ComplexType @requires(fields: "name")
+    type User {
+        id: ID!
+        isSomeComplexType: ComplexType @computed(selectionSet: "{ name }")
     }
 
     type Query {
+        _entities(representations: [_Any!]!): [_Entity]! @merge
+        _service: Service!
         _dummy: String!
     }
+    
+    scalar _Any
+
+    union _Entity = User
 `;
 
 
 const extendedUserResolvers = {
     Query: {
         _dummy: () => 'OK',
+        _entities: (root, args) => {
+            return args.representations;
+        },
+        _service: () => {
+            return {
+                sdl: typeDefs,
+            }
+        },
     },
     User: {
         isSomeComplexType: (source, args) => {
@@ -33,7 +54,7 @@ const extendedUserResolvers = {
     }
 }
 
-const federatedExtendedUserSchema = buildSubgraphSchema({
+const federatedExtendedUserSchema = createSchema({
     typeDefs,
     resolvers: extendedUserResolvers,
 });
@@ -42,12 +63,15 @@ const federatedExtendedUserSchema = buildSubgraphSchema({
 const PORT = 4002;
 
 async function init() {
-    const server = new ApolloServer({
+    const yoga = createYoga({
         schema: federatedExtendedUserSchema,
     });
 
-    await server.listen(PORT);
-    console.log(`Extended user service running on port: ${PORT}`);
+    const graphQLServer = createServer(yoga);
+
+    graphQLServer.listen(PORT, () => {
+        console.log(`Extended user service running on port: ${PORT}`);
+    });
 }
 
 void init();
