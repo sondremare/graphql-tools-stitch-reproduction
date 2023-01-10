@@ -16,11 +16,6 @@ const typeDefs = `
         sdl: String!
     }
     
-    interface GenericUser {
-        id: ID!
-        name: String!
-    }
-
     type User {
         id: ID!
         name: String!
@@ -42,11 +37,6 @@ const userResolvers = {
             }
         },
     },
-    GenericUser: {
-        __resolveType: () => {
-            return 'User';
-        }
-    }
 }
 
 const federatedUserSchema = createSchema({
